@@ -33,61 +33,11 @@
 Приоритет идентификатора моста рассчитывается путем сложения значений приоритета и расширенного идентификатора системы.
 Расширенным идентификатором системы всегда является номер сети VLAN\@.
 
-\begin{enumerate}[a]
-    \item Создайте и назовите необходимые VLAN на каждом коммутаторе из таблицы выше.
-    \begin{verbatim}
-        vlan 37
-        name Management
-        vlan 47
-        name Sales
-        vlan 57
-        name Operations
-        vlan 999
-        name Parking_Lot
-        vlan 1000
-        name Native
-    \end{verbatim}
+\begin{verbatim}
+    show spanning-tree
+\end{verbatim}
 
-    \item Настройте интерфейс управления и шлюз по умолчанию на каждом коммутаторе, используя
-    информацию об IP-адресе в таблице адресации.
-    \begin{verbatim}
-        interface vlan 37
-        *S1* ip address 192.168.37.11 255.255.255.0
-        *S2* ip address 192.168.37.12 255.255.255.0
-        no shutdown
-        exit
-        ip default-gateway 192.168.37.1
-    \end{verbatim}
-
-    \item Назначьте все неиспользуемые порты коммутатора VLAN Parking\_Lot, настройте их для
-    статического режима доступа и административно деактивируйте их.
-    Примечание.
-    Команда interface range полезна для выполнения этой задачи с минимальным
-    количеством команд.
-    \begin{verbatim}
-        interface vlan 37
-        *S1* ip address 192.168.37.11 255.255.255.0
-        *S2* ip address 192.168.37.12 255.255.255.0
-        no shutdown
-        exit
-        ip default-gateway 192.168.37.1
-    \end{verbatim}
-\end{enumerate}
-
-\subsection{Назначьте сети VLAN соответствующим интерфейсам коммутатора}
-\begin{enumerate}[a]
-    \item Назначьте используемые порты соответствующей VLAN (указанной в таблице VLAN выше) и
-    настройте их для режима статического доступа.
-    \begin{verbatim}
-        *S1* interface f0/6
-        *S2* interface f0/18
-        switchport mode access
-        *S1* switchport access vlan 47
-        *S2* switchport access vlan 57
-    \end{verbatim}
-
-    \item Убедитесь, что VLAN назначены на правильные интерфейсы.
-    \begin{verbatim}
-        show vlan brief
-    \end{verbatim}
-\end{enumerate}
+Какой коммутатор является корневым мостом?
+Почему этот коммутатор был выбран протоколом spanning-tree в качестве корневого моста?
+Какой порт отображается в качестве альтернативного и в настоящее время заблокирован?
+Почему протокол spanning-tree выбрал этот порт в качестве невыделенного (заблокированного) порта?
