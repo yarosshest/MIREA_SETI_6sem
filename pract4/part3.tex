@@ -15,9 +15,11 @@ STP порт.
 Выполните команду show spanning-tree на обоих коммутаторах некорневого моста и посмотрите, какой порт был заблокирован.
 
 \begin{verbatim}
-    *S1* show spanning-tree
+    *S3* show spanning-tree
     *S2* show spanning-tree
 \end{verbatim}
+
+\img{img/png4}{spanning-tree S2 -- S3}
 
 \subsection{Измените стоимость порта.}
 Помимо заблокированного порта, единственным активным портом на этом коммутаторе является порт,
@@ -27,10 +29,10 @@ STP порт.
 
 
 \begin{verbatim}
-    *S1* ***Может меняться***
+    *S2*
 
     config t
-    interface f0/4
+    interface f0/2
     spanning-tree cost 18
 \end{verbatim}
 
@@ -41,13 +43,15 @@ STP порт.
 Почему протокол spanning-tree заменяет ранее заблокированный порт на назначенный порт
 и блокирует порт, который был назначенным портом на другом коммутаторе?
 \begin{verbatim}
-    *S1* show spanning-tree
     *S2* show spanning-tree
+    *S3* show spanning-tree
 
     STP сначала проверяет стоимость пути.
     Порт с более низкой стоимостью пути всегда
     будет предпочтительнее порта с более высокой стоимостью пути.
 \end{verbatim}
+
+\img{img/png6}{spanning-tree коммутаторов}
 
 \subsection{Удалите изменения стоимости порта.}
 \begin{enumerate}[a]
@@ -60,7 +64,6 @@ STP порт.
     \item Повторно выполните команду show spanning-tree, чтобы подтвердить, что протокол STP сбросил
     порт на коммутаторе некорневого моста, вернув исходные настройки порта.
     Протоколу STP требуется примерно 30 секунд, чтобы завершить процесс перевода порта.
-    \begin{verbatim}
-        ping 192.168.57.3
-    \end{verbatim}
 \end{enumerate}
+
+\img{img/png7}{spanning-tree коммутаторов}
