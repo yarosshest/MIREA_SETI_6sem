@@ -13,18 +13,12 @@
 
     \item Отправьте эхо-запрос с компьютера PC-A на коммутатор S2.
     \begin{verbatim}
-        ping 192.168.33.12
+        ping 192.168.37.12
     \end{verbatim}
 \end{enumerate}
+\img{img/png9}{Ping PC-A}
 
 \subsection{Пройдите следующий тест с PC-B}
 В окне командной строки на PC-B выполните команду tracert на адрес PC-A.
 Какие промежуточные IP-адреса отображаются в результатах?
-\begin{verbatim}
-Tracing route to 192.168.47.3 over a maximum of 30 hops:
-
-  1   0 ms      0 ms      4 ms      192.168.57.1
-  2   0 ms      0 ms      0 ms      192.168.47.3
-
-Trace complete.
-\end{verbatim}
+\img{img/png10}{tracert PC-A}

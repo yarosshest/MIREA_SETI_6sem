@@ -36,12 +36,11 @@
     Команда interface range полезна для выполнения этой задачи с минимальным
     количеством команд.
     \begin{verbatim}
-        interface vlan 37
-        *S1* ip address 192.168.37.11 255.255.255.0
-        *S2* ip address 192.168.37.12 255.255.255.0
-        no shutdown
-        exit
-        ip default-gateway 192.168.37.1
+        *S1* interface range f0/2 - 4 , f0/7 - 24 , g0/1 - 2
+        *S2* interface range f0/2 - 17 , f0/19 - 24 , g0/1 - 2
+        switchport mode access
+        switchport access vlan 999
+        shutdown
     \end{verbatim}
 \end{enumerate}
 
@@ -62,3 +61,5 @@
         show vlan brief
     \end{verbatim}
 \end{enumerate}
+
+\img{img/png5}{Настрройка S1 S2}

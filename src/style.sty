@@ -60,6 +60,14 @@
 %\setlength{\abovecaptionskip}{3pt}
 %\setlength{\belowcaptionskip}{3pt}
 
+\newcommand{\img}[2] {
+	\begin{figure}[ht!]
+		\center{\includegraphics[width=0.9\textwidth]{#1}}
+		\caption{#2}
+		\label{fig:#1}
+	\end{figure}
+}
+
 \newenvironment{image}{
 	\begin{figure}[h!tp]
 	\centering
