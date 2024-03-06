@@ -1,0 +1,136 @@
+\section*{\LARGE Выполнение работы}
+\addcontentsline{toc}{section}{Выполнение работы}
+
+
+\section{Создание сети и настройка основных параметровустройства}
+В части 1 вам предстоит настроить топологию сети и основные параметры маршрутизаторов.
+
+\subsection{Создайте сеть согласно топологии.}
+Подключите устройства, как показано в топологии, и подсоедините необходимые кабели.
+
+\subsection{Выполните инициализацию и перезагрузку коммутаторов.}
+\begin{verbatim}
+    enable
+    erase startup-config
+    reload
+\end{verbatim}
+
+\subsection{Настройте базовые параметры каждого коммутатора.}
+\begin{enumerate}[a]
+    \item Отключите поиск DNS\@.
+    \begin{verbatim}
+        enabel
+    \end{verbatim}
+
+    \item Присвойте имена устройствам в соответствии с топологией.
+    \begin{verbatim}
+        hostname R1_Shestakov
+    \end{verbatim}
+
+    \item Назначьте class в качестве зашифрованного пароля доступа к привилегированному режиму.
+    \begin{verbatim}
+        enable secret class
+        service password-encryption
+    \end{verbatim}
+
+    \item Назначьте cisco в качестве паролей консоли и VTY и активируйте вход для консоли и VTY каналов.
+    \begin{verbatim}
+        line console 0
+        password cisco
+        login
+
+        line vty 0 15
+        password cisco
+        login
+    \end{verbatim}
+
+    \item Настройте logging synchronous для консольного канала
+    \begin{verbatim}
+        logging synchronous
+    \end{verbatim}
+
+    \item Настройте баннерное сообщение дня (MOTD) для предупреждения пользователей о запрете
+    несанкционированного доступа.
+    \begin{verbatim}
+        banner motd # You must be authorizeded! #
+    \end{verbatim}
+
+    \item Задайте IP-адрес, указанный в таблице адресации для VLAN 1 на обоих коммутаторах.
+    \begin{verbatim}
+        interface vlan 1
+        *S1* ip address 192.168.4.1 255.255.255.0
+        *S2* ip address 192.168.4.2 255.255.255.0
+        *S3* ip address 192.168.4.3 255.255.255.0
+        no shutdown
+    \end{verbatim}
+
+    \item Скопируйте текущую конфигурацию в файл загрузочной конфигурации.
+    \begin{verbatim}
+        copy running-config startup-config
+    \end{verbatim}
+\end{enumerate}
+
+\subsection{Проверьте связь.}
+Проверьте способность компьютеров обмениваться эхо-запросами.
+Успешно ли выполняется эхо-запрос от коммутатора S1_ФАМИЛИЯ на
+коммутатор S2? Успешно ли выполняется эхо-запрос от коммутатора
+S1_ФАМИЛИЯ на коммутатор S3? Успешно ли выполняется эхо-запрос от
+коммутатора S2 на коммутатор S3?
+Выполняйте отладку до тех пор, пока ответы на все вопросы не будут положительными
+
+\begin{enumerate}[a]
+    \item Присвойте коммутатору имя устройства.
+    \begin{verbatim}
+        enable
+        config t
+        hostname S1
+    \end{verbatim}
+
+    \item Отключите поиск DNS, чтобы предотвратить попытки маршрутизатора неверно преобразовывать
+    введенные команды таким образом, как будто они являются именами узлов.
+    \begin{verbatim}
+        no ip domain lookup
+    \end{verbatim}
+
+    \item Назначьте class в качестве зашифрованного пароля привилегированного режима EXEC\@.
+    \begin{verbatim}
+        enable secret class
+    \end{verbatim}
+
+    \item Назначьте cisco в качестве пароля консоли и включите вход в систему по паролю.
+    \begin{verbatim}
+        line console 0
+        password cisco
+        login
+    \end{verbatim}
+
+    \item Установите cisco в качестве пароля виртуального терминала и активируйте вход.
+    \begin{verbatim}
+        line vty 0 15
+        password cisco
+        login
+    \end{verbatim}
+
+    \item Зашифруйте открытые пароли.
+    \begin{verbatim}
+        service password-encryption
+    \end{verbatim}
+
+    \item Создайте баннер с предупреждением о запрете несанкционированного доступа к устройству.
+    \begin{verbatim}
+        banner motd # You must be authorizeded! #
+    \end{verbatim}
+
+    \item Настройте на коммутаторах время.
+    \begin{verbatim}
+        clock set 19:00:00 23 Feb 2024
+    \end{verbatim}
+
+    \item Сохранение текущей конфигурации в качестве начальной.
+    \begin{verbatim}
+        copy running-config startup-config
+    \end{verbatim}
+\end{enumerate}
+
+\subsection{Настройте узлы ПК.}
+Адреса ПК можно посмотреть в таблице адресации.

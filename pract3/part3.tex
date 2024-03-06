@@ -1,0 +1,54 @@
+\section{Конфигурация магистрального канала стандарта 802.1Q между коммутаторами}
+В части 3 вы вручную настроите интерфейс F0/1 как транковый канал.
+
+\subsection{Вручную настройте магистральный интерфейс F0/1 на коммутаторах S1 и S2}
+\begin{enumerate}[a]
+    \item Настройте интерфейс F0/1 как транковый для обоих коммутаторов.
+    \begin{verbatim}
+        interface f0/1
+        switchport mode trunk
+    \end{verbatim}
+
+    \item Установите native VLAN 1000 на обоих коммутаторах.
+    \begin{verbatim}
+        switchport trunk native vlan 1000
+    \end{verbatim}
+
+    \item Укажите, что VLAN X+10, X+20, X+30 и 1000 могут проходить по транковому каналу
+    \begin{verbatim}
+        switchport trunk allowed vlan 37,47,57,1000
+    \end{verbatim}
+
+    \item Проверьте транковые каналы, native VLAN и разрешенные VLAN через транковые каналы.
+    \begin{verbatim}
+        show interfaces trunk
+    \end{verbatim}
+\end{enumerate}
+
+\subsection{Вручную настройте магистральный интерфейс F0/5 на коммутаторе S1.}
+\begin{enumerate}[a]
+    \item Настройте интерфейс S1 F0/5 с теми же параметрами транкового канала, что и F0/1.
+    Это транковый канал до маршрутизатора.
+    \begin{verbatim}
+        **S1**
+        interface f0/5
+        switchport mode trunk
+        switchport trunk native vlan 1000
+        switchport trunk allowed vlan 37,47,57,1000
+    \end{verbatim}
+
+    \item Сохраните текущую конфигурацию в файл загрузочной конфигурации.
+    \begin{verbatim}
+        copy running-config startup-config
+    \end{verbatim}
+
+    \item Проверьте транковый канал.
+    \begin{verbatim}
+        show interfaces trunk
+    \end{verbatim}
+
+\end{enumerate}
+
+Что произойдет, если G0/0/1 на R1\_ФАМИЛИЯ будет отключен?
+-- Не будет отобразаться
+

@@ -1,0 +1,38 @@
+\section{Настройка маршрутизации между сетями VLAN}
+\subsection{Настройте маршрутизатор}
+\begin{enumerate}[a]
+    \item При необходимости активируйте интерфейс G0/0/1 на маршрутизаторе.
+    \begin{verbatim}
+        interface g0/0/1
+        no shutdown
+        exit
+    \end{verbatim}
+
+    \item Настройте подинтерфейсы для каждой VLAN, как указано в таблице IP-адресации.
+    Все подинтерфейсы используют инкапсуляцию 802.1Q\@.
+    Убедитесь, что подинтерфейсу для native VLAN не назначен IP-адрес.
+    Включите описание для каждого подинтерфейса.
+
+    \begin{verbatim}
+        interface g0/0/1.37
+        description Management VLAN
+        encapsulation dot1q 37
+        ip address 192.168.37.1 255.255.255.0
+        interface g0/0/1.47
+        encapsulation dot1q 47
+        description Sales VLAN
+        ip address 192.168.47.1 255.255.255.0
+        interface g0/0/1.57
+        encapsulation dot1q 57
+        description Operations VLAN
+        ip address 192.168.57.1 255.255.255.0
+        interface g0/0/1.1000
+        encapsulation dot1q 1000 native
+        description Native VLAN
+    \end{verbatim}
+
+    \item Убедитесь, что подинтерфейсы работают.
+    \begin{verbatim}
+        show ip interface brief
+    \end{verbatim}
+\end{enumerate}

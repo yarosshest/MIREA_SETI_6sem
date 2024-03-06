@@ -1,0 +1,123 @@
+\section*{\LARGE Выполнение работы}
+\addcontentsline{toc}{section}{Выполнение работы}
+
+\section{Создание сети и настройка основных параметров устройства}
+
+В первой части лабораторной работы вам предстоит создать топологию сети и настроить базовые
+параметры для узлов ПК и коммутаторов.
+
+\subsection{Создайте сеть согласно топологии}
+Подключите устройства, как показано в топологии, и подсоедините необходимые кабели.
+
+\subsection{Настройте базовые параметры для маршрутизатора.}
+\begin{enumerate}[a]
+    \item Подключитесь к маршрутизатору с помощью консоли и активируйте привилегированный режим
+    EXEC\@.
+    \begin{verbatim}
+        enabel
+    \end{verbatim}
+    \item Войдите в режим конфигурации.
+    \begin{verbatim}
+        config t
+    \end{verbatim}
+    \item Назначьте маршрутизатору имя устройства
+    \begin{verbatim}
+        hostname R1_Shestakov
+    \end{verbatim}
+    \item Отключите поиск DNS, чтобы предотвратить попытки маршрутизатора неверно преобразовывать
+    введенные команды таким образом, как будто они являются именами узлов.
+    \begin{verbatim}
+        no ip domain lookup
+    \end{verbatim}
+    \item Назначьте class в качестве зашифрованного пароля привилегированного режима EXEC\@.
+    \begin{verbatim}
+        enable secret class
+    \end{verbatim}
+    \item Назначьте cisco в качестве пароля консоли и включите вход в систему по паролю.
+    \begin{verbatim}
+        line console 0
+        password cisco
+        login
+    \end{verbatim}
+    \item Установите cisco в качестве пароля виртуального терминала и активируйте вход
+    \begin{verbatim}
+        line vty 0 4
+        password cisco
+        login
+    \end{verbatim}
+    \item Зашифруйте открытые пароли.
+    \begin{verbatim}
+        service password-encryption
+    \end{verbatim}
+    \item Создайте баннер с предупреждением о запрете несанкционированного доступа к устройству.
+    \begin{verbatim}
+        banner motd # You must be authorizeded! #
+    \end{verbatim}
+    \item Сохраните текущую конфигурацию в файл загрузочной конфигурации.
+    \begin{verbatim}
+        copy running-config startup-config
+    \end{verbatim}
+    \item Настройте на маршрутизаторе время.
+    \begin{verbatim}
+        clock set 19:00:00 23 Feb 2024
+    \end{verbatim}
+\end{enumerate}
+
+\subsection{Настройте базовые параметры каждого коммутатора.}
+
+\begin{enumerate}[a]
+    \item Присвойте коммутатору имя устройства.
+    \begin{verbatim}
+        enable
+        config t
+        hostname S1
+    \end{verbatim}
+
+    \item Отключите поиск DNS, чтобы предотвратить попытки маршрутизатора неверно преобразовывать
+    введенные команды таким образом, как будто они являются именами узлов.
+    \begin{verbatim}
+        no ip domain lookup
+    \end{verbatim}
+
+    \item Назначьте class в качестве зашифрованного пароля привилегированного режима EXEC\@.
+    \begin{verbatim}
+        enable secret class
+    \end{verbatim}
+
+    \item Назначьте cisco в качестве пароля консоли и включите вход в систему по паролю.
+    \begin{verbatim}
+        line console 0
+        password cisco
+        login
+    \end{verbatim}
+
+    \item Установите cisco в качестве пароля виртуального терминала и активируйте вход.
+    \begin{verbatim}
+        line vty 0 15
+        password cisco
+        login
+    \end{verbatim}
+
+    \item Зашифруйте открытые пароли.
+    \begin{verbatim}
+        service password-encryption
+    \end{verbatim}
+
+    \item Создайте баннер с предупреждением о запрете несанкционированного доступа к устройству.
+    \begin{verbatim}
+        banner motd # You must be authorizeded! #
+    \end{verbatim}
+
+    \item Настройте на коммутаторах время.
+    \begin{verbatim}
+        clock set 19:00:00 23 Feb 2024
+    \end{verbatim}
+
+    \item Сохранение текущей конфигурации в качестве начальной.
+    \begin{verbatim}
+        copy running-config startup-config
+    \end{verbatim}
+\end{enumerate}
+
+\subsection{Настройте узлы ПК.}
+Адреса ПК можно посмотреть в таблице адресации.

@@ -1,0 +1,30 @@
+\section{Проверьте, работает ли маршрутизация между VLAN}
+\subsection{Выполните следующие тесты с PC-A. Все должно быть успешно.}
+\begin{enumerate}[a]
+    \item Отправьте эхо-запрос с PC-A на шлюз по умолчанию.
+    \begin{verbatim}
+        ping 192.168.47.1
+    \end{verbatim}
+
+    \item Отправьте эхо-запрос с PC-A на PC-B\@.
+    \begin{verbatim}
+        ping 192.168.57.3
+    \end{verbatim}
+
+    \item Отправьте эхо-запрос с компьютера PC-A на коммутатор S2.
+    \begin{verbatim}
+        ping 192.168.33.12
+    \end{verbatim}
+\end{enumerate}
+
+\subsection{Пройдите следующий тест с PC-B}
+В окне командной строки на PC-B выполните команду tracert на адрес PC-A.
+Какие промежуточные IP-адреса отображаются в результатах?
+\begin{verbatim}
+Tracing route to 192.168.47.3 over a maximum of 30 hops:
+
+  1   0 ms      0 ms      4 ms      192.168.57.1
+  2   0 ms      0 ms      0 ms      192.168.47.3
+
+Trace complete.
+\end{verbatim}
