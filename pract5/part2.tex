@@ -1,0 +1,95 @@
+\section{Настройка протокола PAgP}
+Протокол PAgP является проприетарным протоколом агрегирования каналов Cisco. В части 2 вам
+предстоит настроить канал между S1_ФАМИЛИЯ и S3 с использованием протокола PAgP.
+
+\subsection{Настройте PAgP на S1_ФАМИЛИЯ и S3.}
+\begin{verbatim}
+config t
+interface range f0/3-4
+channel-group 1 mode desirable  // S1
+channel-group 1 mode auto  // S3
+no shutdown
+\end{verbatim}
+
+\subsection{Проверьте конфигурации на портах}
+\begin{verbatim}
+show interfaces f0/3 switchport
+\end{verbatim}
+
+\img{img/png}{Проверьте конфигурации на портах}
+
+\subsection{Убедитесь, что порты объединены.}
+\begin{verbatim}
+show etherchannel summary
+\end{verbatim}
+
+\img{img/png1}{etherchannel summary}
+
+\textbf{Что означают флаги «SU» и «P» в сводных данных по Ethernet?}\\
+Флаг P указывает, что порты объединены в порт-канал.\\
+Флаг S указывает, что порт-канал является EtherChannel уровня 2.\\
+Флаг U указывает, что EtherChannel используется.\\
+
+\subsection{Настройте транковые порты.}
+
+\textbf{S1 S3}
+
+\begin{verbatim}
+config t
+interface port-channel 1
+switchport mode trunk
+switchport trunk native vlan 99
+\end{verbatim}
+
+\subsection{Убедитесь в том, что порты настроены в качестве транковых}
+
+Выполните команды \verb|show running-startup| идентификатор-интерфейса
+на S1\_ФАМИЛИЯ и S3.
+Какие команды включены в список для интерфейсов F0/3 и F0/4
+на обоих коммутаторах?
+
+\begin{verbatim}
+switchport trunk native vlan 99
+switchport mode trunk
+\end{verbatim}
+
+Сравните результаты с текущей конфигурацией для интерфейса Po1.
+Запишите наблюдения.
+
+Команды, относящиеся к конфигурации таранков, одинаковы.
+Когда команды таранков были применены к EtherChannel,
+команды также повлияли на отдельные ссылки в пакете.
+
+\begin{verbatim}
+!
+interface Port-channel1
+ switchport trunk native vlan 99
+ switchport mode trunk
+!
+interface FastEthernet0/1
+!
+interface FastEthernet0/2
+!
+interface FastEthernet0/3
+ switchport trunk native vlan 99
+ switchport mode trunk
+ channel-group 1 mode desirable
+!
+\end{verbatim}
+
+Выполните команды \verb|show interfaces trunk| и \verb|show spanning-tree|
+на S1\_ФАМИЛИЯ и S3.
+Какой транковый порт включен в список?
+Какая используется сеть native VLAN?
+Какой вывод можно сделать на основе выходных данных?
+
+Указанный таранковый порт - Po1.
+Собственная VLAN - 99.
+После объединения ссылок в некоторых командах отображается только
+агрегированный интерфейс.
+
+Какие значения стоимости и приоритета порта
+для агрегированного канала отображены
+в выходных данных команды show spanning-tree?
+
+Стоимость порта для Po1 равна 12, а приоритет порта равен 128.
