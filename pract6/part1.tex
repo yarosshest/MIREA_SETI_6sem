@@ -1,0 +1,83 @@
+\section*{\LARGE Выполнение работы}
+\addcontentsline{toc}{section}{Выполнение работы}
+
+
+\section{Создание сети и настройка основных параметров устройства}
+В первой части лабораторной работы вам предстоит создать топологию сети и настроить базовые
+параметры для узлов ПК и коммутаторов.
+
+\subsection{Создание схемы адресации}
+Подсеть сети 192.168.1.0/24 в соответствии со следующими требованиями:
+
+\begin{table}[htbp]
+    \centering
+    \caption{Network Device Information}
+    \label{tab:network_devices}
+    \begin{tabular}{|l|l|l|l|l|}
+        \hline
+        \textbf{Device} & \textbf{Interface} & \textbf{IP Address}
+        & \textbf{Subnet Mask} & \textbf{Default Gateway} \\ \hline
+        R1 & G0/0/0 & 10.0.0.1 & 255.255.255.252 & N/A \\ \hline
+        R1 & G0/0/1 & N/A & N/A & N/A \\ \hline
+        R1 & G0/0/1.100 & 192.168.1.1 & 255.255.255.192 & N/A \\ \hline
+        R1 & G0/0/1.227 & 192.168.1.65 & 255.255.255.224 & N/A \\ \hline
+        R1 & G0/0/1.1000 & N/A & N/A & N/A \\ \hline
+        R2 & G0/0/0 & 10.0.0.2 & 255.255.255.252 & N/A \\ \hline
+        R2 & G0/0/1 & 192.168.1.97 & 255.255.255.240 & N/A \\ \hline
+        S1 & VLAN 227 & 192.168.1.66 & 255.255.255.224 & 192.168.1.65 \\ \hline
+        S2 & VLAN 1 & 192.168.1.98 & 255.255.255.240 & 192.168.1.97 \\ \hline
+        PC & NIC & DHCP & DHCP & DHCP \\ \hline
+        PC & NIC & DHCP & DHCP & DHCP \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Выполните инициализацию и перезагрузку коммутаторов. }
+\begin{verbatim}
+    enable
+    erase startup-config
+    reload
+\end{verbatim}
+
+\subsection{Настройте базовые параметры каждого коммутатора.}
+\begin{verbatim}
+enable
+config t
+no ip domain lookup
+hostname S1_Shestakov // S1
+hostname S2 // S2
+hostname S3 // S3
+service password-encryption
+banner motd # You must be authorizeded! #
+enable secret class
+line console 0
+password cisco
+login
+line vty 0 15
+password cisco
+login
+logging synchronous
+interface range f0/5, f0/7-24, g0/1-2  // S1
+interface range f0/5-17, f0/19-24, g0/1-2  // S2
+interface range f0/5-17, f0/19-24, g0/1-2  // S3
+shutdown
+vlan 99
+name Management
+vlan 37
+name Staff
+interface f0/6  // S1
+interface f0/18  // S2
+interface f0/18  // S3
+switchport mode access
+switchport access vlan 37
+no shutdown
+interface vlan 99
+ip address 192.168.99.11 255.255.255.0 // S1
+ip address 192.168.99.12 255.255.255.0 // S2
+ip address 192.168.99.13 255.255.255.0 // S3
+no shutdown
+end
+copy running-config startup-config
+\end{verbatim}
+
+\subsection{Настройте компьютеры.}
+Назначьте IP-адреса компьютерам в соответствии с таблицей адресации.
