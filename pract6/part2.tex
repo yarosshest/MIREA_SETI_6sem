@@ -1,95 +1,96 @@
-\section{Настройка протокола PAgP}
-Протокол PAgP является проприетарным протоколом агрегирования каналов Cisco. В части 2 вам
-предстоит настроить канал между S1_ФАМИЛИЯ и S3 с использованием протокола PAgP.
+\section{Настройка и проверка двух серверов DHCPv4 на R1\_ФАМИЛИЯ}
 
-\subsection{Настройте PAgP на S1_ФАМИЛИЯ и S3.}
-\begin{verbatim}
-config t
-interface range f0/3-4
-channel-group 1 mode desirable  // S1
-channel-group 1 mode auto  // S3
-no shutdown
-\end{verbatim}
-
-\subsection{Проверьте конфигурации на портах}
-\begin{verbatim}
-show interfaces f0/3 switchport
-\end{verbatim}
-
-\img{img/png}{Проверьте конфигурации на портах}
-
-\subsection{Убедитесь, что порты объединены.}
-\begin{verbatim}
-show etherchannel summary
-\end{verbatim}
-
-\img{img/png1}{etherchannel summary}
-
-\textbf{Что означают флаги «SU» и «P» в сводных данных по Ethernet?}\\
-Флаг P указывает, что порты объединены в порт-канал.\\
-Флаг S указывает, что порт-канал является EtherChannel уровня 2.\\
-Флаг U указывает, что EtherChannel используется.\\
-
-\subsection{Настройте транковые порты.}
-
-\textbf{S1 S3}
+\subsection{Настройте R1\_ФАМИЛИЯ с пулами DHCPv4
+для двух поддерживаемых подсетей}
 
 \begin{verbatim}
-config t
-interface port-channel 1
-switchport mode trunk
-switchport trunk native vlan 99
+ip dhcp excluded-address 192.168.1.1 192.168.1.5
+ip dhcp pool R1_Client_LAN
+network 192.168.1.0 255.255.255.192
+domain-name ccna-lab.com
+default-router 192.168.1.1
+lease 2 12 30
+
+ip dhcp excluded-address 192.168.1.97 192.168.1.101
+ip dhcp pool R2_Client_LAN
+network 192.168.1.96 255.255.255.240
+default-router 192.168.1.97
+domain-name ccna-lab.com
+lease 2 12 30
 \end{verbatim}
 
-\subsection{Убедитесь в том, что порты настроены в качестве транковых}
-
-Выполните команды \verb|show running-startup| идентификатор-интерфейса
-на S1\_ФАМИЛИЯ и S3.
-Какие команды включены в список для интерфейсов F0/3 и F0/4
-на обоих коммутаторах?
+\subsection{Сохраните конфигурацию}
+Сохраните текущую конфигурацию в файл загрузочной конфигурации.
+Закройте окно настройки.
 
 \begin{verbatim}
-switchport trunk native vlan 99
-switchport mode trunk
+copy running-config startup-config
 \end{verbatim}
 
-Сравните результаты с текущей конфигурацией для интерфейса Po1.
-Запишите наблюдения.
+\subsection{Проверка конфигурации сервера DHCPv4}
 
-Команды, относящиеся к конфигурации таранков, одинаковы.
-Когда команды таранков были применены к EtherChannel,
-команды также повлияли на отдельные ссылки в пакете.
+Чтобы просмотреть сведения о пуле,
+выполните команду \texttt{show ip dhcp pool}.
+
+Выполните команду \texttt{show ip dhcp binding}
+для проверки установленных назначений адресов DHCP.
+Выполните команду \textbf{show ip dhcp server statistics}
+для проверки сообщений DHCP.
+
+\textbf{NOT WORK?}
+
+\subsection{Попытка получить IP-адрес от DHCP на PC-A}
+
+Из командной строки компьютера PC-A выполните команду ipconfig /all.
+
+После завершения процесса обновления выполните команду ipconfig для просмотра новой информации об IP-адресе.
+
+Проверьте подключение с помощью эхо-запроса
+на IP-адрес интерфейса R1\_ФАМИЛИЯ G0/0/1.
 
 \begin{verbatim}
-!
-interface Port-channel1
- switchport trunk native vlan 99
- switchport mode trunk
-!
-interface FastEthernet0/1
-!
-interface FastEthernet0/2
-!
-interface FastEthernet0/3
- switchport trunk native vlan 99
- switchport mode trunk
- channel-group 1 mode desirable
-!
+ping 192.168.1.1
 \end{verbatim}
 
-Выполните команды \verb|show interfaces trunk| и \verb|show spanning-tree|
-на S1\_ФАМИЛИЯ и S3.
-Какой транковый порт включен в список?
-Какая используется сеть native VLAN?
-Какой вывод можно сделать на основе выходных данных?
+\subsection{Настройка и проверка DHCP-ретрансляции на R2}
 
-Указанный таранковый порт - Po1.
-Собственная VLAN - 99.
-После объединения ссылок в некоторых командах отображается только
-агрегированный интерфейс.
+\subsection{\\Настройка R2 в качестве агента DHCP-ретрансляции
+для локальной сети на G0/0/1}
 
-Какие значения стоимости и приоритета порта
-для агрегированного канала отображены
-в выходных данных команды show spanning-tree?
+Настройте команду ip helper-address на G0/0/1,
+указав IP-адрес G0/0/0 R1\_ФАМИЛИЯ.
 
-Стоимость порта для Po1 равна 12, а приоритет порта равен 128.
+\begin{verbatim}
+// R2
+interface g0/0/1
+ip helper-address 10.0.0.1
+\end{verbatim}
+
+Сохраните конфигурацию.
+
+\begin{verbatim}
+copy running-config startup-config
+\end{verbatim}
+
+\subsection{Попытка получить IP-адрес от DHCP на PC-B}
+
+Из командной строки компьютера PC-B выполните команду \texttt{ipconfig /all}.
+
+После завершения процесса обновления выполните команду\texttt{ipconfig}
+для просмотра новой информации об IP-адресе.
+
+Проверьте подключение с помощью эхо-запроса
+на IP-адрес интерфейса R1\_ФАМИЛИЯ G0/0/1.
+
+\begin{verbatim}
+ping 192.168.1.1
+\end{verbatim}
+
+Выполните \texttt{show ip dhcp binding} для R1\_ФАМИЛИЯ =
+для проверки назначений адресов в DHCP.
+
+
+Выполните команду \texttt{show ip dhcp server statistics}
+для проверки сообщений DHCP.
+
+\textbf{NOT WORK?}

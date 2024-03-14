@@ -31,53 +31,236 @@
     \end{tabular}
 \end{table}
 
-\subsection{Выполните инициализацию и перезагрузку коммутаторов. }
+\subsection{Создайте сеть согласно топологии.}
+Подключите устройства, как показано в топологии, и подсоедините необходимые кабели.
+
+\subsection{Произведите базовую настройку маршрутизаторов.}
 \begin{verbatim}
     enable
-    erase startup-config
-    reload
+    configure t
+    hostname R1_Shestakov
+    no ip domain lookup
+    enable secret class
+    line console 0
+    password cisco
+    login
+    line vty 0 4
+    password cisco
+    login
+    service password-encryption
+    banner motd # You must be authorizeded! #
+    copy running-config startup-config
+    clock set 21:15:00 12 Mar 2024
 \end{verbatim}
 
-\subsection{Настройте базовые параметры каждого коммутатора.}
+\subsection{Настройка маршрутизации между сетями VLAN на маршрутизаторе R1\_ФАМИЛИЯ}
+Назначьте IP-адреса компьютерам в соответствии с таблицей адресации.
+Активируйте интерфейс G0/0/1 на маршрутизаторе.
+
 \begin{verbatim}
-enable
-config t
-no ip domain lookup
-hostname S1_Shestakov // S1
-hostname S2 // S2
-hostname S3 // S3
-service password-encryption
-banner motd # You must be authorizeded! #
+interface g0/0/1
+no shutdown
+exit
+\end{verbatim}
+
+Настройте подинтерфейсы для каждой VLAN
+в соответствии с требованиями таблицы IPадресации.
+Все субинтерфейсы используют инкапсуляцию 802.1Q
+и назначаются первый полезный адрес из вычисленного пула IP-адресов.
+Убедитесь, что подинтерфейсу для native VLAN не назначен IP-адрес.
+Включите описание для каждого подинтерфейса.
+
+\begin{verbatim}
+interface g0/0/1.100
+description Client
+encapsulation dot1q 100
+ip address 192.168.1.1 255.255.255.192
+interface g0/0/1.203
+encapsulation dot1q 203
+description Management
+ip address 192.168.1.65 255.255.255.224
+interface g0/0/1.1000
+encapsulation dot1q 1000 native
+description Native
+\end{verbatim}
+
+\subsection{Настройте G0/1 на R2, затем G0/0/0
+и статическую маршрутизацию для обоих маршрутизаторов}
+
+Настройте G0/0/1 на R2 с первым IP-адресом подсети C, рассчитанным ранее.
+
+\begin{verbatim}
+interface g0/0/1
+ip address 192.168.1.97 255.255.255.240
+no shutdown
+exit
+\end{verbatim}
+
+Настройте интерфейс G0/0/0 для каждого маршрутизатора
+на основе приведенной выше таблицы IP-адресации.
+
+\begin{verbatim}
+interface g0/0/0
+ip address 10.0.0.1 255.255.255.252  // R1
+ip address 10.0.0.2 255.255.255.252  // R2
+no shutdown
+\end{verbatim}
+
+Настройте маршрут по умолчанию на каждом маршрутизаторе,
+указываемом на IP-адрес G0/0/0 на другом маршрутизаторе.
+
+\begin{verbatim}
+ip route 0.0.0.0 0.0.0.0 10.0.0.2  // R1
+ip route 0.0.0.0 0.0.0.0 10.0.0.1  // R2
+\end{verbatim}
+
+Убедитесь, что статическая маршрутизация работает
+с помощью отправки эхо-запроса до адреса G0/0/1 R2 от R1\_ФАМИЛИЯ.
+
+\begin{verbatim}
+ping 192.168.1.97
+\end{verbatim}
+
+Сохраните текущую конфигурацию в файл загрузочной конфигурации
+
+\begin{verbatim}
+copy running-config startup-config
+\end{verbatim}
+
+\subsection{Настройте базовые параметры каждого коммутатора}
+
+\begin{verbatim}
+hostname S1
+no ip domain-lookup
 enable secret class
 line console 0
 password cisco
 login
-line vty 0 15
+line vty 0 4
 password cisco
 login
-logging synchronous
-interface range f0/5, f0/7-24, g0/1-2  // S1
-interface range f0/5-17, f0/19-24, g0/1-2  // S2
-interface range f0/5-17, f0/19-24, g0/1-2  // S3
-shutdown
-vlan 99
+service password-encryption
+banner motd # You must be authorizeded! #
+exit
+copy running-config startup-config
+clock set 21:32:00 13 Mar 2019
+\end{verbatim}
+
+\subsection{Создайте сети VLAN на коммутаторе S1.}
+
+Создайте необходимые VLAN на коммутаторе 1
+и присвойте им имена из приведенной выше таблицы.
+
+\begin{verbatim}
+vlan 100
+name Clients
+vlan 200
 name Management
-vlan 37
-name Staff
-interface f0/6  // S1
-interface f0/18  // S2
-interface f0/18  // S3
+vlan 999
+name Parking\_Lot
+vlan 1000
+name Native
+exit
+\end{verbatim}
+
+Настройте и активируйте интерфейс управления на S1 (VLAN X+200),
+используя второй IP-адрес из подсети, рассчитанный ранее.
+Кроме того установите шлюз по умолчанию на S1.
+
+\begin{verbatim}
+interface vlan 227
+ip address 192.168.1.66 255.255.255.224
+no shutdown
+exit
+ip default-gateway 192.168.1.65
+\end{verbatim}
+
+Настройте и активируйте интерфейс управления на S2 (VLAN 1),
+используя второй IP-адрес из подсети, рассчитанный ранее.
+Кроме того, установите шлюз по умолчанию на S2
+
+\begin{verbatim}
+interface vlan 1
+ip address 192.168.1.98 255.255.255.240
+no shutdown
+exit
+ip default-gateway 192.168.1.97
+\end{verbatim}
+
+Назначьте все неиспользуемые порты S1 VLAN Parking\_Lot,
+настройте их для статического режима доступа
+и административно деактивируйте их.
+На S2 административно деактивируйте все неиспользуемые порты.
+
+\begin{verbatim}
+interface range f0/1 - 4, f0/7 - 24, g0/1 - 2  // S1
+interface range f0/1 - 4, f0/6 - 17, f0/19 - 24, g0/1 - 2  // S2
 switchport mode access
-switchport access vlan 37
-no shutdown
-interface vlan 99
-ip address 192.168.99.11 255.255.255.0 // S1
-ip address 192.168.99.12 255.255.255.0 // S2
-ip address 192.168.99.13 255.255.255.0 // S3
-no shutdown
-end
+switchport access vlan 999  // S1
+shutdown
+exit
+\end{verbatim}
+
+\subsection{Назначьте сети VLAN соответствующим интерфейсам коммутатора}
+
+Назначьте используемые порты соответствующей VLAN
+(указанной в таблице VLAN выше)
+и настройте их для режима статического доступа.
+
+\begin{verbatim}
+// S1
+interface f0/6
+switchport mode access
+switchport access vlan 100
+\end{verbatim}
+
+
+Убедитесь, что VLAN назначены на правильные интерфейсы.
+
+\begin{verbatim}
+// S1
+show vlan brief
+\end{verbatim}
+
+\textbf{Почему интерфейс F0/5 указан в VLAN 1?}\\
+Порт 5 находится в VLAN по умолчанию и не был настроен как магистраль 802.1Q.
+
+\subsection{Вручную настройте интерфейс S1 F0/5 в качестве транка 802.1Q}
+
+Измените режим порта коммутатора,
+чтобы принудительно создать магистральный канал.
+
+\begin{verbatim}
+interface f0/5
+switchport mode trunk
+\end{verbatim}
+
+В рамках конфигурации транкового канала установите
+для native VLAN значение 1000.
+
+\begin{verbatim}
+switchport trunk native vlan 1000
+\end{verbatim}
+
+В качестве другой части конфигурации магистрали укажите, что VLAN 100, X+200 и 1000 могут проходить по транковому каналу.
+
+\begin{verbatim}
+switchport trunk allowed vlan 100,227,1000
+\end{verbatim}
+
+Сохраните текущую конфигурацию в файл загрузочной конфигурации.
+
+\begin{verbatim}
 copy running-config startup-config
 \end{verbatim}
 
-\subsection{Настройте компьютеры.}
-Назначьте IP-адреса компьютерам в соответствии с таблицей адресации.
+Проверьте состояние транкового канала.
+
+\begin{verbatim}
+show interfaces trunk
+\end{verbatim}
+
+\textbf{Какой IP-адрес был бы у ПК,
+    если бы он был подключен к сети с помощью DHCP?}\\
+Они будут самонастраиваться с помощью автоматического
+частного IP-адреса (APIPA) в диапазоне 169.254.x.x.
