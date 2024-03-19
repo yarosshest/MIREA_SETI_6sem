@@ -1,0 +1,92 @@
+\section*{\LARGE Выполнение работы}
+\addcontentsline{toc}{section}{Выполнение работы}
+
+
+\section{Настройка основного сетевого устройства}
+В первой части лабораторной работы вам предстоит создать топологию сети и настроить базовые
+параметры для узлов ПК и коммутаторов.
+
+\subsection{Создайте сеть}
+\begin{itemize}
+    \item Создайте сеть согласно топологии.
+    \item Инициализация устройств
+\end{itemize}
+
+\subsection{Настройте маршрутизатор R1\_ФАМИЛИЯ}
+\begin{verbatim}
+    enable
+    configure terminal
+    hostname R1_shetakov
+    no ip domain lookup
+    ip dhcp excluded-address 192.168.37.1 192.168.37.9
+    ip dhcp excluded-address 192.168.37.201 192.168.37.202
+    !
+    ip dhcp pool Students
+    network 192.168.37.0 255.255.255.0
+    default-router 192.168.37.1
+    domain-name CCNA2.Lab-7
+    !
+    interface Loopback0
+    ip address 10.10.1.1 255.255.255.0
+    !
+    interface GigabitEthernet0/0/1
+    description Link to S1
+    ip dhcp relay information trusted
+    ip address 192.168.37.1 255.255.255.0
+    no shutdown
+    !
+    line con 0
+    logging synchronous
+    exec-timeout 0 0
+\end{verbatim}
+
+\subsection{Выполните инициализацию и перезагрузку коммутаторов. }
+\begin{verbatim}
+    enable
+    erase startup-config
+    reload
+\end{verbatim}
+
+\subsection{Настройте базовые параметры каждого коммутатора.}
+\begin{verbatim}
+enable
+config t
+no ip domain lookup
+hostname S1_Shestakov // S1
+hostname S2 // S2
+hostname S3 // S3
+service password-encryption
+banner motd # You must be authorizeded! #
+enable secret class
+line console 0
+password cisco
+login
+line vty 0 15
+password cisco
+login
+logging synchronous
+interface range f0/5, f0/7-24, g0/1-2  // S1
+interface range f0/5-17, f0/19-24, g0/1-2  // S2
+interface range f0/5-17, f0/19-24, g0/1-2  // S3
+shutdown
+vlan 99
+name Management
+vlan 37
+name Staff
+interface f0/6  // S1
+interface f0/18  // S2
+interface f0/18  // S3
+switchport mode access
+switchport access vlan 37
+no shutdown
+interface vlan 99
+ip address 192.168.99.11 255.255.255.0 // S1
+ip address 192.168.99.12 255.255.255.0 // S2
+ip address 192.168.99.13 255.255.255.0 // S3
+no shutdown
+end
+copy running-config startup-config
+\end{verbatim}
+
+\subsection{Настройте компьютеры.}
+Назначьте IP-адреса компьютерам в соответствии с таблицей адресации.
