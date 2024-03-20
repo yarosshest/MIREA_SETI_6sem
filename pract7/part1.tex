@@ -40,53 +40,43 @@
     exec-timeout 0 0
 \end{verbatim}
 
-\subsection{Выполните инициализацию и перезагрузку коммутаторов. }
-\begin{verbatim}
-    enable
-    erase startup-config
-    reload
-\end{verbatim}
+\subsection{Настройка и проверка основных параметров коммутатора}
+Настройте имя хоста для коммутаторов S1 и S2.
 
-\subsection{Настройте базовые параметры каждого коммутатора.}
 \begin{verbatim}
-enable
 config t
-no ip domain lookup
-hostname S1_Shestakov // S1
-hostname S2 // S2
-hostname S3 // S3
-service password-encryption
-banner motd # You must be authorizeded! #
-enable secret class
-line console 0
-password cisco
-login
-line vty 0 15
-password cisco
-login
-logging synchronous
-interface range f0/5, f0/7-24, g0/1-2  // S1
-interface range f0/5-17, f0/19-24, g0/1-2  // S2
-interface range f0/5-17, f0/19-24, g0/1-2  // S3
-shutdown
-vlan 99
-name Management
-vlan 37
-name Staff
-interface f0/6  // S1
-interface f0/18  // S2
-interface f0/18  // S3
-switchport mode access
-switchport access vlan 37
-no shutdown
-interface vlan 99
-ip address 192.168.99.11 255.255.255.0 // S1
-ip address 192.168.99.12 255.255.255.0 // S2
-ip address 192.168.99.13 255.255.255.0 // S3
-no shutdown
-end
-copy running-config startup-config
+hostname S1  // S1
+hostname S2  // S2
 \end{verbatim}
 
-\subsection{Настройте компьютеры.}
-Назначьте IP-адреса компьютерам в соответствии с таблицей адресации.
+Запретите нежелательный поиск в DNS.
+
+\begin{verbatim}
+no ip domain-lookup
+\end{verbatim}
+
+Настройте описания интерфейса для портов, которые используются в S1 и S2.
+
+\begin{verbatim}
+// S1
+interface f0/1
+description Link to S2
+interface f0/5
+description Link to R1
+interface f0/6
+description Link to PC-A
+
+// S2
+interface f0/1
+description Link to S1
+interface f0/18
+description Link to PC-B
+\end{verbatim}
+
+Установите для шлюза по умолчанию для VLAN управления значение 192.168.37.1
+на обоих коммутаторах.
+
+\begin{verbatim}
+ip default-gateway 192.168.37.1
+\end{verbatim}
+
