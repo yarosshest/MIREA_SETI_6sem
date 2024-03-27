@@ -1,0 +1,37 @@
+\section{Настройка сетей VLAN на коммутаторах}
+
+\subsection{Сконфигруриуйте VLAN X+10.}
+Добавьте VLAN X+10 на S1 и S2 и назовите VLAN - Management.
+
+\begin{verbatim}
+vlan 37
+name Management
+\end{verbatim}
+
+\subsection{Сконфигруриуйте SVI для VLAN X+10}
+Настройте IP-адрес в соответствии с таблицей адресации для SVI для VLAN X+10 на S1 и S2.
+Включите интерфейсы SVI и предоставьте описание для интерфейса.
+
+\begin{verbatim}
+interface vlan 37
+ip address 192.168.37.201 255.255.255.0  // S1
+ip address 192.168.37.202 255.255.255.0  // S2
+description Management SVI
+no shutdown
+\end{verbatim}
+
+\subsection{Настройте VLAN 333 с именем Native на S1 и S2.}
+
+\begin{verbatim}
+vlan 333
+name Native
+\end{verbatim}
+
+\subsection{Настройте VLAN 999 с именем ParkingLot на S1 и S2}
+
+\begin{verbatim}
+vlan 999
+name ParkingLot
+\end{verbatim}
+
+\img{img/img_2.png}{Настроеные vlan коммутаторов}

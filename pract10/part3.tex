@@ -1,0 +1,227 @@
+\section{Настройки безопасности коммутатора.}
+
+\subsection{Релизация магистральных соединений 802.1Q.}
+
+Настройте все магистральные порты Fa0/1 на обоих коммутаторах
+для использования VLAN 333 в качестве native VLAN.
+
+\begin{verbatim}
+interface f0/1
+switchport mode trunk
+switchport trunk native vlan 333
+\end{verbatim}
+
+Убедитесь, что режим транкинга успешно настроен на всех коммутаторах
+с помощью команды \texttt{show interface trunk} на обоих коммутаторах.
+
+\img{img/img_3.png}{Результат комадны show interface trunk}
+Отключить согласование DTP F0/1 на S1 и S2.
+
+\begin{verbatim}
+interface f0/1
+switchport nonegotiate
+\end{verbatim}
+
+Проверьте с помощью команды \texttt{show interfaces}.
+
+\img{img/img_4.png}{Результат комадны show interface}
+
+\subsection{Настройка портов доступа}
+
+На S1 настройте F0/5 и F0/6 в качестве портов доступа и свяжите их с VLAN 37.
+
+\begin{verbatim}
+interface range f0/5 - 6
+switchport mode access
+switchport access vlan 37
+\end{verbatim}
+
+На S2 настройте порт доступа Fa0/18 и свяжите его с VLAN 37.
+
+\begin{verbatim}
+interface f0/18
+switchport mode access
+switchport access vlan 37
+\end{verbatim}
+
+\subsection{Безопасность неиспользуемых портов коммутатора}
+
+На S1 и S2 переместите неиспользуемые порты из VLAN 1 в VLAN 999
+и отключите неиспользуемые порты.
+
+\begin{verbatim}
+interface range f0/2-4 , f0/7-24, g0/1-2  // S1
+interface range f0/2-17 , f0/19-24, g0/1-2  // S2
+switchport mode access
+switchport access vlan 999
+shutdown
+\end{verbatim}
+
+Убедитесь, что неиспользуемые порты отключены и связаны с VLAN 999,
+введя команду \texttt{show interfaces status}.
+
+\img{img/img_5.png}{Результат комадны show interface status}
+
+\subsection{Документирование и реализация функций безопасности порта}
+
+Интерфейсы F0/6 на S1 и F0/18 на S2 настроены как порты доступа.
+На этом шаге вы также настроите безопасность портов
+на этих двух портах доступа.
+
+На S1 введите команду\texttt{show port-security interface f0/6}
+для отображения настроек по умолчанию безопасности порта для интерфейса F0/6.
+
+\img{img/img_6.png}{Результат комадны show port-security interface f0/6}
+
+На S1 включите защиту порта на F0/6 со следующими настройками:
+
+\begin{itemize}
+    \item Максимальное количество записей MAC-адресов: 3
+    \item Режим безопасности: restrict
+    \item Aging time: 60 мин.
+    \item Aging type: неактивный
+\end{itemize}
+
+\begin{verbatim}
+interface f0/6
+switchport port-security
+switchport port-security maximum 3
+switchport port-security violation restrict
+switchport port-security aging time 60
+switchport port-security aging type inactivity
+\end{verbatim}
+
+Проверьте настройки защиты порта (port-security) на S1 для интерфейса F0/6.
+Далее просмотрите выходные данные команды \texttt{show port-security address}.
+
+\img{img/img_7.png}{Результат комадны show port-security address}
+
+\begin{verbatim}
+show port-security interface f0/6
+\end{verbatim}
+
+\begin{verbatim}
+show port-security address
+\end{verbatim}
+
+
+Включите безопасность порта для F0/18 на S2.
+Настройте каждый активный порт доступа таким образом,
+чтобы он автоматически добавлял адреса МАС, изученные на этом порту,
+в текущую конфигурацию.
+
+\begin{verbatim}
+interface f0/18
+switchport port-security
+switchport port-security mac-address sticky
+\end{verbatim}
+
+Настройте следующие параметры безопасности порта на S2 F0/18:
+
+\begin{itemize}
+    \item Максимальное количество записей MAC-адресов: 2
+    \item Тип безопасности: Protect
+    \item Aging time: 60 мин.
+\end{itemize}
+
+\begin{verbatim}
+interface f0/18
+switchport port-security aging time 60
+switchport port-security maximum 2
+switchport port-security violation protect
+\end{verbatim}
+
+Проверьте настройки защиты порта (port-security)
+на S2 для интерфейса F0/18. Далее просмотрите выходные
+данные команды \texttt{show port-security address}.
+
+\begin{verbatim}
+show port-security interface f0/18
+\end{verbatim}
+
+\begin{verbatim}
+show port-security address
+\end{verbatim}
+
+\img{img/img_8.png}{Результат комадны show port-security address}
+
+\subsection{Реализовать безопасность DHCP snooping}
+
+На S2 включите DHCP snooping и настройте DHCP snooping во VLAN X+10.
+
+\begin{verbatim}
+ip dhcp snooping
+ip dhcp snooping vlan 37
+\end{verbatim}
+
+Настройте магистральные порты на S2 как доверенные порты.
+
+\begin{verbatim}
+interface f0/1
+ip dhcp snooping trust
+\end{verbatim}
+
+Ограничьте ненадежный порт Fa0/18 на S2 пятью DHCP-пакетами в секунду.
+
+\begin{verbatim}
+interface f0/18
+ip dhcp snooping limit rate 5
+\end{verbatim}
+
+Проверьте DHCP Snooping на S2 с помощью команды show ip dhcp snooping.
+
+\begin{verbatim}
+show ip dhcp snooping
+\end{verbatim}
+
+\img{img/img_9.png}{Результат комадны show ip dhcp snooping}
+
+
+В командной строке на PC-B освободите, а затем обновите IP-адрес.
+
+\begin{verbatim}
+C:\Users\Student> ipconfig /release
+C:\Users\Student> ipconfig /renew
+\end{verbatim}
+
+\img{img/img_10.png}{Результат комадны ipconfig}
+
+Проверьте привязку отслеживания DHCP
+с помощью команды \texttt{show ip dhcp snooping binding}.
+
+\img{img/img_11.png}{Результат комадны show ip dhcp snooping binding}
+
+\subsection{Реализация PortFast и BPDU Guard}
+
+Настройте PortFast на всех портах доступа,
+которые используются на обоих коммутаторах.
+
+\begin{verbatim}
+interface range f0/5 - 6  // S1
+interface f0/18  // S2
+spanning-tree portfast
+\end{verbatim}
+
+Включите защиту BPDU на портах доступа VLAN 13 для S1 и S2,
+подключенных к PC-A и PC-B.
+
+\begin{verbatim}
+interface f0/6  // S1
+interface f0/18  // S2
+spanning-tree bpduguard enable
+\end{verbatim}
+
+Убедитесь, что защита BPDU и PortFast включены на соответствующих портах
+с помощью команды \texttt{show spanning-tree interface f0/6 detail}.
+
+\begin{verbatim}
+show spanning-tree interface f0/6 detail
+\end{verbatim}
+
+\img{img/img_12.png}{Результат комадны show spanning-tree interface f0/6 detail}
+
+\img{img/img_13.png}{Результат комадны spanning-tree interface f0/18 detail}
+
+
+
+
