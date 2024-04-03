@@ -1,410 +1,443 @@
-\section{Создание сети и настройка основных параметров устройства}
+\section{Построение сети и проверка связи}
+\subsection{Создайте сеть согласно топологии.}
+Подключите устройства, как показано в топологии, и подсоедините необходимые кабели.
 
-\subsection{Настройте основные параметры на каждом
-маршрутизаторе и коммутаторе}
+\subsection{Настройте узлы ПК.}
+
+\subsection{ Выполните инициализацию и перезагрузку маршрутизатора и коммутаторов. }
+
+
+
+\subsection{Произведите базовую настройку маршрутизаторов.}
 
 \begin{verbatim}
-no ip domain lookup
-service password-encryption
-enable secret class
-line console 0
-password cisco
-login
-logging synchronous
-line vty 0 4
-password cisco
-login
-logging synchronous
-banner motd # You must be authorizeded! #
+    /* Начало */
+    no ip domain lookup
+    service password-encryption
+    enable secret class
+    line console 0
+    password cisco
+    login
+    logging synchronous
+    line vty 0 15
+    password class
+    login
+    logging synchronous
+    banner motd # You must be authorizeded! #
+    /* Начало */
 
-/* Switch1 */
-hostname S1
-interface vlan 1
-no shutdown
-interface range f0/1-24, g0/1-2
-shutdown
-interface f0/5
-no shutdown
-switchport mode access
-switchport access vlan 1
-interface f0/6
-no shutdown
-switchport mode access
-switchport access vlan 1
-/* Switch */
+    /* R1 */
+    hostname R1
+    interface g 0/1
+    ip address 192.168.1.1 255.255.255.0
+    no shutdown
+    interface se 0/0/0
+    ip address 10.1.1.1 255.255.255.252
+    no shutdown
+    clock rate 128000
+    /* R1 */
 
-/* Switch3 */
-hostname S3
-interface vlan 1
-no shutdown
-interface range f0/1-24, g0/1-2
-shutdown
-interface f0/5
-no shutdown
-switchport mode access
-switchport access vlan 1
-interface f0/18
-no shutdown
-switchport mode access
-switchport access vlan 1
-/* Switch */
+    /* R2_Shestakov */
+    hostname R2_Shestakov
+    interface se 0/0/0
+    ip address 10.1.1.2 255.255.255.252
+    no shutdown
+    interface se 0/0/1
+    ip address 10.2.2.2 255.255.255.252
+    no shutdown
+    clock rate 128000
+    interface Lo1
+    ip address 209.165.227.225 255.255.255.224
+    /* R2_Shestakov */
 
-/* Routre */
-// R1
-hostname R1
-interface vlan 1
-no shutdown
-interface g 0/1
-no shutdown
-ip address 172.30.10.1 255.255.255.0
-description R1 gb 0/1
-interface se 0/0/0
-no shutdown
-ip address 10.1.1.1 255.255.255.252
-description R1 se 0/1
-clock rate 64000
+    /* R3 */
+    hostname R3
+    interface g 0/1
+    ip address 192.168.1.3 255.255.255.0
+    no shutdown
+    interface se 0/0/1
+    ip address 10.2.2.1 255.255.255.252
+    no shutdown
+    /* R3 */
 
-// R2_ФАМИЛИЯ
-hostname R2_Shestakov
-interface g 0/0
-no shutdown
-ip address 209.165.228.1 255.255.255.0
-description R2 gb 0/0
-interface se 0/0/0
-no shutdown
-ip address 10.1.1.2 255.255.255.252
-description R2 se 0
-clock rate 64000
-interface se 0/0/1
-no shutdown
-ip address 10.2.2.2 255.255.255.252
-description R2 se 1
-clock rate 64000
-
-
-// R3
-hostname R3
-interface vlan 1
-no shutdown
-interface g 0/1
-no shutdown
-ip address 172.30.30.1 255.255.255.0
-description R3 gb 0/1
-interface se 0/0/1
-no shutdown
-ip address 10.2.2.1 255.255.255.252
-description R3 se 0/0/1
-clock rate 64000
-/* Routre */
-
-
-end
-copy running-config startup-config
+    /* Конец */
+    end
+    copy running-config startup-config
+    /* Конец */
 \end{verbatim}
 
-\subsection{Проверка связи}
+\subsection{ Настройте базовые параметры каждого коммутатора.}
 
-На данный момент компьютеры не могут отправлять друг другу эхо-запросы.
+\begin{verbatim}
+    /* Начало */
+    no ip domain lookup
+    service password-encryption
+    enable secret class
+    line console 0
+    password cisco
+    login
+    logging synchronous
+    line vty 0 15
+    password class
+    login
+    logging synchronous
+    banner motd # You must be authorizeded! #
+    /* Начало */
 
-Каждая рабочая станция должна иметь возможность проводить
-эхо-тестирование присоединенного маршрутизатора.
-При неудачном выполнении эхо-запросов выполните поиск и устранение неполадок.
+    /* Switch1 */
+    hostname S1
+    interface vlan 1
+    ip address 192.168.1.11 255.255.255.0
+    ip default-gateway 192.168.1.1
+    no shutdown
+    /* Switch1 */
 
-Маршрутизаторы должны успешно отправлять эхо-запросы друг другу.
-При неудачномвыполнении эхо-запросов выполните поиск и устранение неполадок
+    /* Switch3 */
+    hostname S3
+    interface vlan 1
+    ip address 192.168.1.13 255.255.255.0
+    ip default-gateway 192.168.1.3
+    no shutdown
+    /* Switch3 */
+
+    /* Конец */
+    end
+    copy running-config startup-config
+    /* Конец */
+\end{verbatim}
+
+\subsection{Проверьте подключение между PC-A и PC-C.}
+
+Отправьте ping-запрос с компьютера PC-A на компьютер PC-C. Удалось липолучить ответ? \textbf{Да}
+Если команды ping завершились неудачно и связь установить не удалось, исправьте ошибки
+в основных настройках устройства.
+
 
 \begin{image}
     \includegrph{img/img.png}
     \caption{Выполнение эхо-запросов}
 \end{image}
 
-\section{Настройка и проверка маршрутизации RIPv2}
-
-\subsection{Настройте маршрутизацию по протоколу RIPv2}
-Настройте протокол RIPv2 на маршрутизаторе R1
-в качестве протоколамаршрутизации и проинформируйте
-об этом соответствующие подключенные сети.
+\subsection{Настройте маршрутизацию.}
+Настройте RIP версии 2 на всех маршрутизаторах.
+Добавьте в процесс RIP все сети, кроме
+209.165.X+200.224/27.
 
 \begin{verbatim}
-config t
-router rip
-version 2
-passive-interface g0/1
-network 172.30.0.0
-network 10.0.0.0
+    /* R1 R3 */
+    config t
+    router rip
+    version 2
+    no auto-summary
+    do sh ip route connected
+    network 10.0.0.0
+    network 192.168.1.0
+    /* R1 R3 */
+
+    /* R2 */
+    config t
+    router rip
+    version 2
+    no auto-summary
+    do sh ip route connected
+    network 10.0.0.0
+    /* R2 */
 \end{verbatim}
 
-Настройте протокол RIPv2 на маршрутизаторе R3 и воспользуйтесь
-командой network, чтобы добавить соответствующие сети
-и предотвратить обновления маршрутизации в интерфейсе локальной сети.
+Настройте маршрут по умолчанию на маршрутизаторе R2\_ФАМИЛИЯ с использованием
+Lo1 в качестве интерфейса выхода в сеть 209.165.X+200.224/27.
 
 \begin{verbatim}
-config t
-router rip
-version 2
-passive-interface g0/1
-network 172.30.0.0
-network 10.0.0.0
+    /* R2 */
+    config t
+    ip route 0.0.0.0 0.0.0.0 loopback 1
+    /* R2 */
 \end{verbatim}
 
-Настройте протокол RIPv2 на маршрутизаторе R2\_ФАМИЛИЯ и воспользуйтесь
-командой network,чтобы добавить соответствующие подключенные сети.
-Не объявляйте сеть 209.165.228.0.
+На маршрутизаторе R2\_ФАМИЛИЯ используйте следующие команды для перераспределения
+маршрута по умолчанию в процесс RIP.
 
 \begin{verbatim}
-config t
-router rip
-version 2
-passive-interface g0/0
-network 10.0.0.0
+    /* R2 */
+    config t
+    router rip
+    default-information originate
+    /* R2 */
 \end{verbatim}
 
-\subsection{Проверьте текущее состояние сети}
+\subsection{Проверьте подключение}
 
-Состояние двух последовательных каналов можно легко проверить
-с помощью команды \texttt{show ip interface brief}
-на маршрутизаторе R2\_ФАМИЛИЯ.
+Необходимо получить ответ на ping-запросы с компьютера PC-A от каждого интерфейса на
+маршрутизаторах R1, R2\_ФАМИЛИЯ и R3, а также от компьютера PC-C. Удалось ли получить
+все ответы?
+Если команды ping завершились неудачно и связь установить не удалось, исправьте ошибки
+в основных настройках устройства.
 
 \begin{image}
     \includegrph{img/img_1.png}
-    \caption{Вывод команды show ip interface brief}
+    \caption{Эхо-запрос от компьютера PC-A на интерфейс G0/1 маршрутизатора R1}
 \end{image}
-
-Проверьте наличие подключения между компьютерами.
-
-\textbf{Успешно ли отправляется эхо-запрос от узла PC-A на PC-B? Почему?}
-
-Нет, R2 не объявлен маршрут к PC-B.
-
-\textbf{Успешно ли проходит эхо-запрос с PC-A на PC-С? Почему?}
-
-Нет, у R1 и R3 нет маршрутов к удаленным сетям,
-а у R2 неправильно указаны два маршрута балансировки нагрузки
-с равной стоимостью к подсети 172.30.0.0/16.
-
-\textbf{Успешно ли проходит эхо-запрос с узла PC-С на PC-B? Почему?}
-
-Нет, R2 не объявлен маршрут к PC-B.
-
-\textbf{Успешно ли проходит эхо-запрос с узла PC-С на PC-А? Почему?}
-
-Нет, у R1 и R3 нет маршрутов к удаленным сетям,
-а у R2 неправильно указаны два маршрута балансировки нагрузки
-с равной стоимостью к подсети 172.30.0.0/16.
-
-Убедитесь в том, что протокол RIPv2 активирован на маршрутизаторах.
-Чтобы проверить это, можно воспользоваться командами \texttt{debug ip rip},
-\texttt{show ip protocols} и \texttt{show run}.
 
 \begin{image}
     \includegrph{img/img_2.png}
-    \caption{Вывод команды show ip protocols и debug ip rip}
+    \caption{Эхо-запрос от компьютера PC-A на интерфейс S0/0/0 маршрутизатора R1}
 \end{image}
 
 \begin{image}
     \includegrph{img/img_3.png}
-    \caption{Вывод команды debug ip rip}
+    \caption{Эхо-запрос от компьютера PC-A на интерфейс S0/0/0 маршрутизатора R2}
 \end{image}
-
-\textbf{Какие сведения подтверждают работу RIPv2
-при выполнении команды debug ip rip на маршрутизаторе R2\_ФАМИЛИЯ?}
-
-RIP: sending v2 updates to 224.0.0.9 via Serial 0/0/0 (10.1.1.2).
-RIP: sending v2 updates to 224.0.0.9 via Serial 0/0/1 (10.2.2.2).
-
-Изучив выходные данные отладки, в командной строке привилегированного
-режима выполните команду \textbf{undebug all}.
-
-\textbf{Какие сведения подтверждают работу RIPv2
-при выполнении команды show run на маршрутизаторе R3?}
-
-router rip
-version 2
 
 \begin{image}
     \includegrph{img/img_4.png}
-    \caption{Вывод команды show run}
+    \caption{Эхо-запрос от компьютера PC-A на интерфейс S0/0/1 маршрутизатора R2}
 \end{image}
-
-Отключите автоматическое суммирование маршрутов.
-
-Локальные сети, подключенные к маршрутизаторам R1 и R3,
-состоят из «разорванных» сетей. Маршрутизатор R2\_ФАМИЛИЯ отображает
-в таблице маршрутизации два пути к сети 172.30.0.0/16,
-имеющие одинаковую стоимость. Маршрутизатор R2\_ФАМИЛИЯ отображает
-только адрес главной классовой сети 172.30.0.0,
-но не отображает подсети этой сети.
-
-\begin{verbatim}
-// R2
-show ip route
-\end{verbatim}
 
 \begin{image}
     \includegrph{img/img_5.png}
-    \caption{Вывод команды show ip route}
+    \caption{Эхо-запрос от компьютера PC-A на интерфейс Lo1 маршрутизатора R2}
 \end{image}
-
-Маршрутизатор R1 отображает только собственную подсеть
-для сети 172.30.10.0/24. В таблице маршрутизации R1 нет маршрута
-для подсети 172.30.30.0/24 маршрутизатора R3.
-
-\begin{verbatim}
-// R1
-show ip route
-\end{verbatim}
 
 \begin{image}
     \includegrph{img/img_6.png}
-    \caption{Вывод команды show ip route}
+    \caption{Эхо-запрос от компьютера PC-A на интерфейс G0/1 маршрутизатора R1}
 \end{image}
-
-Маршрутизатор R3 отображает только собственную подсеть
-для сети 172.30.30.0/24. В таблице маршрутизации R3 нет маршрута
-для подсетей 172.30.10.0/24 маршрутизатора R1.
-
-\begin{verbatim}
-// R3
-show ip route
-\end{verbatim}
 
 \begin{image}
     \includegrph{img/img_7.png}
-    \caption{Вывод команды show ip route}
+    \caption{Эхо-запрос от компьютера PC-A на интерфейс S0/0/1 маршрутизатора R1}
 \end{image}
-
-Чтобы определить маршруты, полученные в обновлениях RIP от маршрутизатора R3,
-используйте команду debug ip rip на маршрутизаторе R2\_ФАМИЛИЯ.
-Укажите их далее.
-
-172.30.0.0/16
-
-\subsection{Отключите автоматическое объединение}
-
-Для отключения автоматического суммирования
-в RIPv2 используется команда \texttt{no auto-summary}.
-Отключите автоматическое суммирование на всех маршрутизаторах.
-Маршрутизаторы больше не суммируют маршруты на границах главной
-классовой сети.
-
-\begin{verbatim}
-router rip
-no auto-summary
-\end{verbatim}
-
-Чтобы очистить таблицу маршрутизации, используйте команду clear ip route *.
-
-\begin{verbatim}
-clear ip route *
-\end{verbatim}
-
-Изучите таблицы маршрутизации. Не забывайте, что после очистки таблиц
-маршрутизации потребуется некоторое время для выравнивания их содержимого.
-Подсети LAN, подключенные к маршрутизаторам R1 и R3,
-должны быть включены во все три таблицы маршрутизации.
-
-\begin{verbatim}
-show ip route
-\end{verbatim}
 
 \begin{image}
     \includegrph{img/img_8.png}
-    \caption{Вывод команды show ip route}
+    \caption{Эхо-запрос от компьютера PC-C на интерфейс G0/1 маршрутизатора R1}
 \end{image}
-
-Чтобы проверить обновления RIP, на маршрутизаторе
-R2\_ФАМИЛИЯ используйте команду \texttt{debug ip rip}.
-
-Через 60 секунд выполните команду \texttt{no debug ip rip}.
 
 \begin{image}
     \includegrph{img/img_9.png}
-    \caption{Вывод команды debug ip rip}
+    \caption{Эхо-запрос от компьютера PC-C на интерфейс S0/0/0 маршрутизатора R1}
 \end{image}
-
-\textbf{Какие маршруты содержатся в обновлениях RIP, принятых от R3?}
-
-172.30.30.0/24
-
-\textbf{Включены ли маски подсети в обновления маршрутизации?}
-
-Да
-
-\subsection{Настройка и перераспределение маршрута
-по умолчанию для доступа к Интернету}
-
-На маршрутизаторе R2\_ФАМИЛИЯ создайте статический маршрут
-к сети 0.0.0.0 0.0.0.0 с помощью команды \texttt{ip route}.
-В результате весь трафик с неизвестным адресом назначения будет пересылаться
-на компьютер PC-B с адресом 209.165.228.2,
-моделируя Интернет путем настройки шлюза "<последней надежды">
-на маршрутизаторе R2\_ФАМИЛИЯ.
-
-\begin{verbatim}
-ip route 0.0.0.0 0.0.0.0 209.165.228.2
-\end{verbatim}
-
-Маршрутизатор R2\_ФАМИЛИЯ объявит маршрут для других маршрутизаторов,
-если команда \texttt{default-information originate} будет добавлена
-в его конфигурацию RIP.
-
-\begin{verbatim}
-router rip
-default-information originate
-\end{verbatim}
-
-\subsection{Проверка конфигурации маршрутизации}
-
-Просмотрите таблицу маршрутизации маршрутизатора R1.
-
-\begin{verbatim}
-show ip route
-\end{verbatim}
 
 \begin{image}
     \includegrph{img/img_10.png}
-    \caption{Вывод команды show ip route}
+    \caption{Эхо-запрос от компьютера PC-C на интерфейс S0/0/0 маршрутизатора R2}
 \end{image}
-
-\textbf{Как на основании таблицы маршрутизации можно определить, что сеть,
-    разбитая на подсети и используемая маршрутизаторами R1 и R3,
-    имеет путь для интернет-трафика?}
-
-Существует шлюз последней узла,
-и маршрут по умолчанию отображается в таблице как изучаемый с помощью RIP.
-
-Просмотрите таблицу маршрутизации на R2\_ФАМИЛИЯ.
 
 \begin{image}
     \includegrph{img/img_11.png}
-    \caption{Вывод команды show ip route}
+    \caption{Эхо-запрос от компьютера PC-C на интерфейс S0/0/1 маршрутизатора R2}
 \end{image}
-
-\textbf{Каким образом путь для интернет-трафика появился
-в таблице маршрутизации маршрутизатора R2\_ФАМИЛИЯ?}
-
-R2 имеет статический маршрут по умолчанию к 0.0.0.0 через 209.165.201.2,
-который напрямую подключен к G0/0.
-
-\subsection{Проверьте подключение}
-
-Смоделируйте отправку трафика в Интернет,
-отправив эхо-запросы от узла PC-A и PC-C в сеть 209.165.228.2.
-
-\textbf{Успешно ли выполнена проверка связи?}
-
-Да
-
-Убедитесь в том, что узлы в разбитой на подсети сети могут достичь друг друга.
-Для этого выполните эхо-запрос между узлами PC-A и PC-C.
-
-\textbf{Успешно ли выполнена проверка связи?}
-
-Да
 
 \begin{image}
     \includegrph{img/img_12.png}
-    \caption{Вывод команды ping}
+    \caption{Эхо-запрос от компьютера PC-C на интерфейс Lo1 маршрутизатора R2}
+\end{image}
+
+\begin{image}
+    \includegrph{img/img_13.png}
+    \caption{Эхо-запрос от компьютера PC-C на интерфейс G0/1 маршрутизатора R1}
+\end{image}
+
+\begin{image}
+    \includegrph{img/img_14.png}
+    \caption{Эхо-запрос от компьютера PC-C на интерфейс S0/0/1 маршрутизатора R1}
+\end{image}
+
+\section{Настройка обеспечения избыточности на первом хопе
+с помощью HSRP}
+
+Даже если топология спроектирована с учетом избыточности (два маршрутизатора и два коммутатора
+в одной сети LAN), оба компьютера, PC-A и PC-C, необходимо настраивать с одним адресом шлюза.
+PC-A использует R1, а PC-C — R3. В случае сбоя на одном из этих маршрутизаторов или интерфейсов
+маршрутизаторов компьютер может потерять подключение к сети Интернет.
+В части 2 вам предстоит изучить поведение сети до и после настройки протокола HSRP. Для этого вам
+понадобится определить путь, по которому проходят пакеты, чтобы достичь loopback-адрес на
+R2\_ФАМИЛИЯ.
+
+\subsection{Определите путь интернет-трафика для PC-A и PC-C.}
+В командной строке на PC-A введите команду tracert для loopback-адреса 209.165.X+200.225
+на маршрутизаторе R2\_ФАМИЛИЯ.
+Какой путь прошли пакеты от PC-A до 209.165.X+200.225?
+
+\begin{image}
+    \includegrph{img/img_15.png}
+    \caption{tracert от PC-A до 209.165.X+200.225 }
+\end{image}
+
+В командной строке на PC-С введите команду tracert для loopback-адреса 209.165.X+200.225
+на маршрутизаторе R2\_ФАМИЛИЯ.
+Какой путь прошли пакеты от PC-C до 209.165.X+200.225?
+\begin{image}
+    \includegrph{img/img_16.png}
+    \caption{tracert от PC-С до 209.165.X+200.225 }
+\end{image}
+
+\subsection{Запустите сеанс эхо-тестирования на PC-A и разорвите соединение между S1 и R1.}
+В командной строке на PC-A введите команду ping –t для адреса 209.165.X+200.225
+на маршрутизаторе R2\_ФАМИЛИЯ. Убедитесь, что окно командной строки открыто
+
+\begin{image}
+    \includegrph{img/img_17.png}
+    \caption{ping –t от PC-А до 209.165.X+200.225 }
+\end{image}
+
+В процессе эхо-тестирования отсоедините кабель Ethernet от интерфейса F0/5 на S1.
+Отключение интерфейса F0/5 на S1 приведет к тому же результату.
+Что произошло с трафиком эхо-запросов?
+
+\begin{image}
+    \includegrph{img/img_18.png}
+    \caption{Отключение интерфейса F0/5 на S1 PC-A}
+\end{image}
+
+Какими были бы результате при повторении шагов 2a и 2b на компьютере PC-C и коммутаторе S3?
+Такой же результат.
+
+Повторно подсоедините кабели Ethernet к интерфейсу F0/5 или включите интерфейс F0/5 на S1 и S3, соответственно.
+Повторно отправьте эхо-запросы на 209.165.X+200.225 с компьютеров PC-A и PC-C, чтобы убедиться в том, что подключение восстановлено.
+
+\begin{image}
+    \includegrph{img/img_19.png}
+    \caption{Отключение интерфейса F0/5 на S1 PC-C}
+\end{image}
+
+Повторно подсоедините кабели Ethernet к интерфейсу F0/5 или включите интерфейс F0/5 на S1
+и S3, соответственно. Повторно отправьте эхо-запросы на 209.165.X+200.225 с компьютеров
+PC-A и PC-C, чтобы убедиться в том, что подключение восстановлено.
+
+\subsection{Настройте HSRP на R1 и R3.}
+В этом шаге вам предстоит настроить HSRP и изменить адрес шлюза по умолчанию на компьютерах
+PC-A, PC-C, S1 и коммутаторе S2 на виртуальный IP-адрес для HSRP. R1 назначается активным
+маршрутизатором с помощью команды приоритета HSRP.
+
+\begin{verbatim}
+    /* R1 */
+    interface g 0/1
+    standby version 2
+    standby 1 ip 192.168.1.254
+    standby 1 priority 150
+    standby 1 preempt
+    /* R1 */
+
+    /* R3 */
+    interface g 0/1
+    standby version 2
+    standby 1 ip 192.168.1.254
+    /* R3 */
+
+    /* Конец */
+    end
+    copy running-config startup-config
+    /* Конец */
+\end{verbatim}
+
+Проверьте HSRP, выполнив команду show standby на R1 и R3.
+
+\begin{image}
+    \includegrph{img/img_20.png}
+    \caption{show standby на R1 и R3}
+\end{image}
+
+Используя указанные выходные данные, ответьте на следующие вопросы:
+Какой маршрутизатор является активным?
+Маршрутизатор R1
+Какой MAC-адрес используется для виртуального IP-адреса?
+0000.0C9F.F001
+Какой IP-адрес и приоритет используются для резервного маршрутизатора?
+Priority 100
+192.168.1.254
+
+Используйте команду show standby brief на R1 и R3, чтобы просмотреть сводку состояния HSRP.
+
+\begin{image}
+    \includegrph{img/img_21.png}
+    \caption{show standby brief на R1 и R3}
+\end{image}
+Измените адрес шлюза по умолчанию для PC-A, PC-C, S1 и S3. Какой адрес следует использовать?
+PC-A
+ip 192.168.1.31
+mask 255.255.255.0
+gw 192.168.1.1 -> 192.168.1.254
+
+PC-C
+ip 192.168.1.33
+mask 255.255.255.0
+gw 192.168.1.3 -> 192.168.1.254
+
+\begin{verbatim}
+    /* S1 */
+    ip default-gateway 192.168.1.254
+    /* S1 */
+
+    /* S3 */
+    ip default-gateway 192.168.1.254
+    /* S3 */
+\end{verbatim}
+
+Проверьте новые настройки.
+Отправьте эхо-запрос с PC-A и с PC-C на loopback-адрес маршрутизатора R2\_ФАМИЛИЯ.
+Успешно ли выполнены эхо-запросы?
+
+\begin{image}
+    \includegrph{img/img_22.png}
+    \caption{эхо-запрос с PC-A на loopback-адрес маршрутизатора R2\_ФАМИЛИЯ}
+\end{image}
+
+\begin{image}
+    \includegrph{img/img_23.png}
+    \caption{эхо-запрос с PC-C на loopback-адрес маршрутизатора R2\_ФАМИЛИЯ}
+\end{image}
+
+\subsection{Запустите сеанс эхо-тестирования на PC-A и разорвите соединение
+с коммутатором, подключенным к активному маршрутизатору HSRP (R1).}
+
+В командной строке на PC-A введите команду ping –t для адреса 209.165.X+200.225
+на маршрутизаторе R2. Убедитесь, что окно командной строки открыто.
+
+Во время отправки эхо-запроса отсоедините кабель Ethernet от интерфейса F0/5 на коммутаторе S1 или
+выключите интерфейс F0/5.
+\begin{image}
+    \includegrph{img/img_24.png}
+    \caption{ping –t для адреса 209.165.X+200.225
+    на маршрутизаторе R2}
+\end{image}
+
+Что произошло с трафиком эхо-запросов?
+Компьютер PC-A по-прежнему может отправлять эхо-запросы на интерфейс маршрутизатора R2.
+
+\subsection{Проверьте настройки HSRP на маршрутизаторах R1 и R3.}
+Выполните команду show standby brief на маршрутизаторах R1 и R3.
+\begin{image}
+    \includegrph{img/img_25.png}
+    \caption{show standby brief на маршрутизаторах R1 и R3}
+\end{image}
+
+show standby brief на маршрутизаторах R1 и R3
+
+Повторно подключите кабель, соединяющий коммутатор и маршрутизатор, или включите интерфейс F0/5.
+Какой маршрутизатор теперь является активным?
+Поясните ответ.
+\begin{image}
+    \includegrph{img/img_26.png}
+    \caption{show standby brief на маршрутизаторах R1 и R3}
+\end{image}
+
+R1 стал активным маршрутизатором, поскольку вытеснение включено и имеет более высокий приоритет
+\section{Изменение приоритетов HSRP.}
+
+Измените приоритет HSRP на 200 на маршрутизаторе R3. Какой маршрутизатор является
+активным?
+
+\begin{image}
+    \includegrph{img/img_27.png}
+    \caption{ HSRP на 200 на маршрутизаторе R3}
+\end{image}
+
+Выполните команду, чтобы сделать активным маршрутизатор R3 без изменения приоритета.
+Используйте команду show, чтобы убедиться, что R3 является активным маршрутизатором.
+\begin{image}
+    \includegrph{img/img_28.png}
+    \caption{ HSRP на 200 на маршрутизаторе R3}
 \end{image}
 
 \section{Ответы на контрольные вопросы}
