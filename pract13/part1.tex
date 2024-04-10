@@ -1,0 +1,191 @@
+192.168.0.0/26\\
+
+11000000.10101000.00000000.00|000000\\
+
+192.168.0.0/29\\
+
+11000000.10101000.00000000.00000|000\\
+
+
+1) 192.168.0.0/29 \\
+2) 192.168.0.8/29\\
+3) 192.168.0.16/29\\
+4) 192.168.0.24/29\\
+5) 192.168.0.32/29\\
+6) 192.168.0.40/29\\
+7) 192.168.0.48/29\\
+8) 192.168.0.56/29\\
+
+
+PC-A\\
+VLAN 10\\
+2) 192.168.0.11/29
+
+PC-B\\
+VLAN 14\\
+3) 192.168.0.19/29
+
+PC-C\\
+4) 192.168.0.29/29 default-gateway 192.168.0.27/29
+
+S0\\
+VLAN 14\\
+3) 192.168.0.20/29
+
+R0-R2\\
+R0(g0/0)\\
+7) 192.168.0.49/29
+R2(g0/0)\\
+7) 192.168.0.54/29\\
+
+R1-R2\\
+R1(g0/0)\\
+8) 192.168.0.57/29\\
+R2(g0/1)\\
+8) 192.168.0.62/29\\
+
+
+\section{1 Задание настройка R2}
+
+\begin{verbatim}
+// R2
+hostname Zachet
+no ip domain lookup
+line console 0
+password console
+login
+line vty 0 4
+password Telnet
+login
+enable secret privilege
+service password-encryption
+banner motd #Warning#
+\end{verbatim}
+
+\section{2 Задание настройка S0}
+
+\begin{verbatim}
+// S0
+interface range f0/3-9, f0/12-24, g0/1-2
+shutdown
+
+interface range f0/1-2, f0/10-11
+switchport mode access
+no shutdown
+
+vlan 10
+vlan 14
+
+interface f0/10
+switchport access vlan 10
+interface vlan 10
+no shutdown
+ip address 192.168.0.11 255.255.255.248
+
+interface f0/11
+switchport access vlan 14
+interface vlan 14
+no shutdown
+ip address 192.168.0.20 255.255.255.248
+
+interface range f0/1-2, f0/10-11
+switchport mode access
+switchport port-security
+switchport port-security maximum 5
+switchport port-security violation protect
+\end{verbatim}
+
+\section{3 Задание Trunk}
+
+\begin{verbatim}
+// S0
+interface range f0/1-2, f0/10-11
+switchport mode trunk
+switchport trunk native vlan 80
+switchport trunk allowed vlan 10,14
+\end{verbatim}
+
+\section{4 Задание Routet-on-a-Stick}
+
+\begin{verbatim}
+//R0
+interface g0/1
+no shutdown
+interface g0/1.10
+encapsulation dot1Q 10
+ip address 192.168.0.9 255.255.255.248
+interface g0/1.14
+encapsulation dot1Q 14
+ip address 192.168.0.18 255.255.255.248
+interface g0/1.80
+encapsulation dot1Q 80
+
+//R1
+interface g0/2
+no shutdown
+interface g0/2.10
+encapsulation dot1Q 10
+ip address 192.168.0.10 255.255.255.248
+interface g0/2.14
+encapsulation dot1Q 14
+ip address 192.168.0.19 255.255.255.248
+interface g0/2.80
+encapsulation dot1Q 80
+\end{verbatim}
+
+
+\section{5 Задание статическая маршрутизация}
+
+\begin{verbatim}
+//R2
+interface g0/0
+ip address 192.168.0.54 255.255.255.248
+no shutdown
+interface g0/1
+ip address 192.168.0.62 255.255.255.248
+no shutdown
+interface g0/2
+ip address 192.168.0.27 255.255.255.248
+no shutdown
+//R0
+interface g0/0
+ip address 192.168.0.49 255.255.255.248
+ip route 192.168.0.48(??) 255.255.255.248 192.168.0.54
+//R1
+interface g0/0
+ip address 192.168.0.57 255.255.255.248
+ip route 192.168.0.48 (??) 255.255.255.240 192.168.0.62
+//R2
+ip route 0.0.0.0 0.0.0.0 192.168.0.57
+ip route 0.0.0.0 0.0.0.0 192.168.0.113 12
+\end{verbatim}
+
+\section{HSRPv2}
+
+\begin{verbatim}
+// R2
+config t
+router rip
+version 2
+no auto-summary
+do sh ip route connected
+network 192.168.0.0
+network 10.0.0.0
+ip route 0.0.0.0 0.0.0.0 loopback 1
+router rip
+default-information originate
+\end{verbatim}
+
+\begin{verbatim}
+// R0
+interface g0/0
+standby version 2
+standby 1 ip 192.168.0.63 (?)
+standby 1 priority 150
+standby 1 preempt
+
+// R1
+interface g0/0
+standby version 2
+standby 1 ip 192.168.1.254
+\end{verbatim}
